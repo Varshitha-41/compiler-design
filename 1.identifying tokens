@@ -1,0 +1,72 @@
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+bool isValidDelimiter(char ch) {
+    return strchr(" +-*/;><=()[]{}", ch) != NULL;
+}
+
+bool isValidOperator(char ch) {
+    return strchr("+-*/><=", ch) != NULL;
+}
+
+bool isValidKeyword(char* str) {
+    char* keywords[] = {"if", "else", "while", "do", "break", "continue", "int", "double", "float",
+                         "return", "char", "case", "sizeof", "long", "short", "typedef", "switch",
+                         "unsigned", "void", "static", "struct", "goto"};
+    int i;
+    for (i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++) {
+        if (strcmp(str, keywords[i]) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool isValidNumber(char* str, bool realNumber) {
+    bool hasDecimal = false;
+    int i;
+    for (i = 0; str[i] != '\0'; i++) {
+        if (str[i] == '.') {
+            if (hasDecimal || !realNumber) {
+                return false; // Multiple decimals or in integer mode
+            }
+            hasDecimal = true;
+        } else if (str[i] < '0' || str[i] > '9') {
+            return false;
+        }
+    }
+    return hasDecimal || !realNumber; // If it's a real number, it must have a decimal point
+}
+
+void detectTokens(char* str) {
+    char* token = strtok(str, " ");
+    while (token != NULL) {
+        if (isValidDelimiter(token[0])) {
+            printf("\nValid delimiter: '%s'", token);
+        } else if (isValidOperator(token[0])) {
+            printf("\nValid operator: '%s'", token);
+        } else if (isValidKeyword(token)) {
+            printf("\nValid keyword: '%s'", token);
+        } else if (isValidNumber(token, false)) {
+            printf("\nValid integer: '%s'", token);
+        } else if (isValidNumber(token, true)) {
+            printf("\nValid real number: '%s'", token);
+        } else {
+            printf("\nInvalid token: '%s'", token);
+        }
+        token = strtok(NULL, " ");
+    }
+}
+
+int main() {
+    char str[100];
+    printf("Enter a program: ");
+    fgets(str, sizeof(str), stdin);
+    str[strcspn(str, "\n")] = '\0'; // Remove newline character if present
+    printf("The Program is : '%s' ", str);
+    printf("\nAll Tokens are : ");
+    detectTokens(str);
+    return 0;
+}
